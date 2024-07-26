@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
-class HomeController extends Controller
+class IndexController extends Controller
 {
     public function index(Request $request)
     {
@@ -14,6 +14,6 @@ class HomeController extends Controller
             ? Product::where('name', 'like', "%{$query}%")->get()
             : Product::limit(6)->get(); // Obtener un límite de productos destacados si no hay búsqueda
 
-        return view('welcome', compact('products'));
+        return view('index', compact('products'));
     }
 }
