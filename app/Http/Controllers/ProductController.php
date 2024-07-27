@@ -1,5 +1,7 @@
 <?php
 
+// app/Http/Controllers/ProductController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\Product;
@@ -11,8 +13,8 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $categories = Category::with('products')->get();
-        return view('index', compact('categories'));
+        $products = Product::paginate(10); // 10 productos por página
+        return view('products.index', compact('products'));
     }
 
     public function create()
@@ -45,5 +47,11 @@ class ProductController extends Controller
     {
         $product->delete();
         return redirect()->route('products.index');
+    }
+
+    // Método para mostrar los detalles de un producto
+    public function show(Product $product)
+    {
+        return view('products.show', compact('product'));
     }
 }

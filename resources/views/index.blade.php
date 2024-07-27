@@ -10,6 +10,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <style>
+        body {
+            background: linear-gradient(to right, #f0f0f0, #4f4f4f);
+            /* Degradado de gris claro a gris oscuro */
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
         .navbar {
             position: relative;
             margin-bottom: 20px;
@@ -70,8 +79,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
             height: 100%;
-            width: 280px;
-
+            width: 270px;
         }
 
         .card:hover {
@@ -82,7 +90,6 @@
         .card-img-top {
             object-fit: cover;
             height: 180px;
-            /* Adjust to fit your design */
             width: 100%;
         }
 
@@ -135,6 +142,23 @@
         .swiper-button-prev {
             color: #007bff;
         }
+
+        footer {
+            background: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        footer a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -155,7 +179,7 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('login') }}">
-                        <i class="fas fa-user"></i> INICIAR SESION
+                        <i class="fas fa-user"></i> INICIAR SESIÓN
                     </a>
                 </li>
             </ul>
@@ -172,7 +196,6 @@
                 <h2>{{ $category->name }}</h2>
 
                 <!-- Swiper -->
-
                 <div class="swiper-container">
                     <div class="swiper-wrapper">
                         @forelse($category->products as $product)
@@ -187,7 +210,8 @@
                                     </div>
                                     <div class="card-footer">
                                         <a href="{{ route('products.show', $product->id) }}"
-                                            class="btn btn-primary">Ver Producto</a>
+                                            class="btn btn-primary">Ver
+                                            Producto</a>
                                     </div>
                                 </div>
                             </div>
@@ -195,9 +219,7 @@
                             <p>No hay productos en esta categoría.</p>
                         @endforelse
                     </div>
-                    <!-- Add Pagination -->
                     <div class="swiper-pagination"></div>
-                    <!-- Add Navigation -->
                     <div class="swiper-button-next"></div>
                     <div class="swiper-button-prev"></div>
                 </div>
@@ -205,13 +227,16 @@
         </div>
     </div>
 
+    <footer>
+        <p>&copy; 2024 Tienda Ruben. Todos los derechos reservados.</p>
+    </footer>
+
     <script src="{{ mix('js/app.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
-        // Initialize Swiper
         var swiper = new Swiper('.swiper-container', {
             slidesPerView: 3,
             spaceBetween: 3,

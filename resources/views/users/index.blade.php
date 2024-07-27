@@ -1,32 +1,54 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1>Users</h1>
-    <a href="{{ route('users.create') }}" class="btn btn-primary">Create User</a>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($users as $user)
-                <tr>
-                    <td>{{ $user->name }}</td>
-                    <td>{{ $user->email }}</td>
-                    <td>
-                        <a href="{{ route('users.show', $user) }}" class="btn btn-info">View</a>
-                        <a href="{{ route('users.edit', $user) }}" class="btn btn-warning">Edit</a>
-                        <form action="{{ route('users.destroy', $user) }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+    <div class="container">
+        <h1 class="text-center mb-4">Users</h1>
+        <div class="d-flex justify-content-center mb-4">
+            <a href="{{ route('users.create') }}" class="btn btn-primary">Crear Usuario</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Avatar</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($users as $user)
+                        <tr>
+                            <td>
+                                @if ($user->avatar)
+                                    <img src="{{ asset('storage/avatars/' . $user->avatar) }}" alt="Avatar"
+                                        class="img-fluid rounded-circle" style="width: 50px; height: 50px;">
+                                @else
+                                    <img src="{{ asset('storage/avatars/default-avatar.png') }}" alt="Default Avatar"
+                                        class="img-fluid rounded-circle" style="width: 50px; height: 50px;">
+                                @endif
+                            </td>
+                            <td>{{ $user->name }}</td>
+                            <td>{{ $user->email }}</td>
+                            <td class="text-center">
+                                <a href="{{ route('users.show', $user) }}" class="btn btn-info btn-sm">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ route('users.edit', $user) }}" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="{{ route('users.destroy', $user) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
 @endsection

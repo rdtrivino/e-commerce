@@ -29,6 +29,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|exists:roles,name', // Validar rol
+            'avatar' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048', // Validar avatar
         ]);
 
         if ($validator->fails()) {
@@ -43,6 +44,10 @@ class UserController extends Controller
 
         $user->assignRole($request->role);
 
+        if ($request->hasFile('avatar')) {
+            $user->setAvatar($request->file('avatar'));
+        }
+
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
 
@@ -54,7 +59,18 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::all(); // Obtener roles para el formulario
-        return view('users.edit', compact('user', 'roles'));
+
+        // Lista de avatares predefinidos (URLs o rutas a imágenes)
+        // Lista de avatares predefinidos (URLs o rutas a imágenes)
+        $avatars = [
+            ['url' => 'https://example.com/avatar1.png', 'name' => 'Avatar 1'],
+            ['url' => 'https://example.com/avatar2.png', 'name' => 'Avatar 2'],
+            ['url' => 'https://example.com/avatar3.png', 'name' => 'Avatar 3'],
+            // Agrega más avatares según sea necesario
+        ];
+
+
+        return view('users.edit', compact('user', 'roles', 'avatars'));
     }
 
     public function update(Request $request, User $user)
@@ -64,6 +80,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|exists:roles,name', // Validar rol
+            'avatar' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048', // Validar avatar
         ]);
 
         if ($validator->fails()) {
@@ -77,6 +94,10 @@ class UserController extends Controller
         ]);
 
         $user->syncRoles($request->role);
+
+        if ($request->hasFile('avatar')) {
+            $user->setAvatar($request->file('avatar'));
+        }
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }

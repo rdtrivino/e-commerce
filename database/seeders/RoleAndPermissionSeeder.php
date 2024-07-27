@@ -10,6 +10,10 @@ class RoleAndPermissionSeeder extends Seeder
 {
     public function run()
     {
+        // Eliminar roles y permisos existentes para evitar duplicados
+        Role::query()->delete();
+        Permission::query()->delete();
+
         // Crear roles
         $admin = Role::create(['name' => 'admin']);
         $user = Role::create(['name' => 'user']);

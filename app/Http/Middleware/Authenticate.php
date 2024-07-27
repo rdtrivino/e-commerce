@@ -17,6 +17,6 @@ class Authenticate extends Middleware
             return null;
         }
 
-        return $request->expectsJson() ? null : route('index');
+        return $request->expectsJson() ? null : route('home');
     }
 }
