@@ -18,7 +18,7 @@ class UserController extends Controller
 
     public function create()
     {
-        $roles = Role::all(); // Obtener roles para el formulario
+        $roles = Role::all();
         return view('users.create', compact('roles'));
     }
 
@@ -58,15 +58,13 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $roles = Role::all(); // Obtener roles para el formulario
+        $roles = Role::all(); 
 
-        // Lista de avatares predefinidos (URLs o rutas a imágenes)
-        // Lista de avatares predefinidos (URLs o rutas a imágenes)
+
         $avatars = [
             ['url' => 'https://example.com/avatar1.png', 'name' => 'Avatar 1'],
             ['url' => 'https://example.com/avatar2.png', 'name' => 'Avatar 2'],
             ['url' => 'https://example.com/avatar3.png', 'name' => 'Avatar 3'],
-            // Agrega más avatares según sea necesario
         ];
 
 

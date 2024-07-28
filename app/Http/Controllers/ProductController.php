@@ -1,57 +1,92 @@
 <?php
 
-// app/Http/Controllers/ProductController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
-use App\Http\Requests\StoreProductRequest;
-use App\Http\Requests\UpdateProductRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::paginate(10); // 10 productos por página
+        $products = Product::paginate(5);
         return view('products.index', compact('products'));
     }
 
     public function create()
     {
-        $categories = Category::all(); // Obtener todas las categorías para el formulario de creación
+        $categories = Category::all();
         return view('products.create', compact('categories'));
     }
 
-    public function store(StoreProductRequest $request)
+    public function store(Request $request)
     {
-        // Crear un nuevo producto con la categoría asociada
-        Product::create($request->validated());
-        return redirect()->route('products.index');
+        $request->validate([
+            'name' => 'required',
+            'price' => 'required|numeric',
+            'description' => 'required',
+            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'category_id' => 'required|exists:categories,id',
+        ]);
+
+        $product = new Product($request->all());
+
+        if ($request->hasFile('image_url')) {
+            $path = $request->file('image_url')->store('public/images');
+            $product->image_url = Storage::url($path);
+        }
+
+        $product->save();
+
+        return redirect()->route('products.index')->with('success', 'Producto creado exitosamente');
+    }
+
+    public function show(Product $product)
+    {
+        return view('products.show', compact('product'));
     }
 
     public function edit(Product $product)
     {
-        $categories = Category::all(); // Obtener todas las categorías para el formulario de edición
+        $categories = Category::all();
         return view('products.edit', compact('product', 'categories'));
     }
 
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(Request $request, Product $product)
     {
-        // Actualizar el producto con los datos proporcionados
-        $product->update($request->validated());
-        return redirect()->route('products.index');
+        $request->validate([
+            'name' => 'required',
+            'price' => 'required|numeric',
+            'description' => 'required',
+            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'category_id' => 'required|exists:categories,id',
+        ]);
+
+        $product->fill($request->all());
+
+        if ($request->hasFile('image_url')) {
+            if ($product->image_url) {
+                Storage::delete(str_replace('/storage', 'public', $product->image_url));
+            }
+
+            $path = $request->file('image_url')->store('public/images');
+            $product->image_url = Storage::url($path);
+        }
+
+        $product->save();
+
+        return redirect()->route('products.index')->with('success', 'Producto actualizado exitosamente');
     }
 
     public function destroy(Product $product)
     {
-        $product->delete();
-        return redirect()->route('products.index');
-    }
+        if ($product->image_url) {
+            Storage::delete(str_replace('/storage', 'public', $product->image_url));
+        }
 
-    // Método para mostrar los detalles de un producto
-    public function show(Product $product)
-    {
-        return view('products.show', compact('product'));
+        $product->delete();
+        return redirect()->route('products.index')->with('success', 'Producto eliminado exitosamente');
     }
 }

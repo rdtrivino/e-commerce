@@ -1,22 +1,22 @@
 <?php
 
+use App\Http\Controllers\IndexController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\CartController;
+use Illuminate\Http\Request;
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
-// Ruta de inicio
-Route::get('/', [ProductController::class, 'index'])->name('home');
+// Ruta de la página de inicio
+Route::get('/', [IndexController::class, 'index'])->name('home');
 
-// Dashboard para Usuario
-Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
-    ->middleware(['auth', 'role:user'])
-    ->name('user.dashboard');
+// Ruta para mostrar un producto público
+Route::get('products/public/{id}', [ProductController::class, 'showPublic'])->name('products.showPublic');
 
 // Rutas de autenticación
 Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -24,11 +24,30 @@ Route::post('login', [AuthenticatedSessionController::class, 'store']);
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
 // Ruta de búsqueda
-Route::get('search', [ProductController::class, 'search'])->name('search');
+Route::get('/search/live', function (Request $request) {
+    $query = $request->input('query');
+    $products = Product::where('name', 'like', "%{$query}%")
+        ->orWhere('description', 'like', "%{$query}%")
+        ->get();
 
-// Rutas de recursos de productos
-Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    return response()->json(['products' => $products]);
+})->name('search.live');
+
+// Ruta para cambiar de categoría y mostrar productos
+Route::get('/categories/change', [CategoryController::class, 'change'])->name('categories.change');
+
+// Ruta para obtener productos de una categoría específica
+Route::get('/categories/{category}/products', [CategoryController::class, 'getProducts']);
+
+// Rutas protegidas por autenticación
 Route::middleware('auth')->group(function () {
+
+    // Dashboard para Usuario
+    Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
+        ->middleware('role:user')
+        ->name('user.dashboard');
+
+    // Rutas de recursos de productos
     Route::resource('products', ProductController::class)->names([
         'index' => 'products.index',
         'create' => 'products.create',
@@ -50,6 +69,7 @@ Route::middleware('auth')->group(function () {
         'destroy' => 'categories.destroy',
     ]);
 
+    // Ruta para mostrar una categoría específica
     Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category');
 
     // Rutas de recursos de órdenes
@@ -61,17 +81,6 @@ Route::middleware('auth')->group(function () {
         'edit' => 'orders.edit',
         'update' => 'orders.update',
         'destroy' => 'orders.destroy',
-    ]);
-
-    // Rutas de recursos de ítems de órdenes
-    Route::resource('order-items', OrderItemController::class)->names([
-        'index' => 'order-items.index',
-        'create' => 'order-items.create',
-        'store' => 'order-items.store',
-        'show' => 'order-items.show',
-        'edit' => 'order-items.edit',
-        'update' => 'order-items.update',
-        'destroy' => 'order-items.destroy',
     ]);
 
     // Ruta para actualizar el avatar del usuario
@@ -87,13 +96,15 @@ Route::middleware('auth')->group(function () {
         'update' => 'users.update',
         'destroy' => 'users.destroy',
     ]);
+
+    // Dashboard para Administrador
+    Route::get('/admin/dashboard', function () {
+        return view('admin.dashboard');
+    })->middleware('role:admin')->name('admin.dashboard');
+
+    // Rutas del carrito de compras
+    Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::get('/cart', [CartController::class, 'viewCart'])->name('cart.view');
+    Route::post('/cart/remove', [CartController::class, 'removeFromCart'])->name('cart.remove');
+    Route::post('/order/create', [OrderController::class, 'createOrder'])->name('order.create');
 });
-
-// Dashboard para Administrador
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
-})->middleware(['auth', 'role:admin'])->name('admin.dashboard');
-
-// Rutas del carrito de compras
-Route::get('/cart', [CartController::class, 'index'])->name('cart');
-Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');

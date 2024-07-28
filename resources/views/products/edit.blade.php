@@ -1,72 +1,49 @@
-<!DOCTYPE html>
-<html lang="es">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Producto</title>
-    <link rel="stylesheet" href="{{ mix('css/app.css') }}">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            max-width: 600px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .btn-custom {
-            margin-top: 10px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <h1 class="text-center">Editar Producto</h1>
-        <form action="{{ route('products.update', $product) }}" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="form-group">
-                <label for="name">Nombre</label>
-                <input type="text" name="name" id="name" class="form-control" value="{{ $product->name }}"
-                    required>
+@section('content')
+    <div class="d-flex flex-column align-items-center min-vh-100"
+        style="background: linear-gradient(to bottom, #f8f9fa, #e0e0e0);">
+        <div class="w-100 d-flex justify-content-start mb-3" style="position: absolute; top: 20px; left: 20px;">
+            <a href="{{ route('products.index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a Productos
+            </a>
+        </div>
+        <div class="card mx-auto" style="max-width: 500px; margin-top: 20px;">
+            <div class="card-header text-center">
+                <h1>Editar Producto</h1>
             </div>
-            <div class="form-group">
-                <label for="price">Precio</label>
-                <input type="number" name="price" id="price" class="form-control" value="{{ $product->price }}"
-                    required>
+            <div class="card-body">
+                <form action="{{ route('products.update', $product) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="form-group">
+                        <label for="name">Nombre</label>
+                        <input type="text" name="name" id="name" class="form-control"
+                            value="{{ $product->name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Precio</label>
+                        <input type="number" name="price" id="price" class="form-control"
+                            value="{{ $product->price }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Descripción</label>
+                        <textarea name="description" id="description" class="form-control" rows="4" required>{{ $product->description }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="image_url">Imagen del Producto</label>
+                        <input type="file" name="image_url" id="image_url" class="form-control">
+                        @if ($product->image_url)
+                            <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="img-thumbnail mt-2"
+                                style="max-width: 150px;">
+                        @endif
+                    </div>
+                    <div class="form-group d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary btn-custom">Actualizar</button>
+                        <a href="{{ route('products.index') }}" class="btn btn-secondary btn-custom">Cancelar</a>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="description">Descripción</label>
-                <textarea name="description" id="description" class="form-control" rows="4" required>{{ $product->description }}</textarea>
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary btn-custom">Actualizar</button>
-                <a href="{{ route('products.index') }}" class="btn btn-secondary btn-custom">Cancelar</a>
-            </div>
-        </form>
+        </div>
     </div>
-
-    <script src="{{ mix('js/app.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-
-</html>
+@endsection

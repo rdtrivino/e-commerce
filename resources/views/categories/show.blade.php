@@ -1,34 +1,37 @@
-<!-- resources/views/categories/show.blade.php -->
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Category Details</title>
-    <!-- Puedes agregar CSS aquí -->
-</head>
+@section('content')
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header text-center">
+                <h1 class="mb-0">Category Details</h1>
+            </div>
+            <div class="card-body">
+                <!-- Mostrar detalles de la categoría -->
+                <div class="mb-4">
+                    <h2 class="h4">Category: {{ $category->name }}</h2>
+                    <p>{{ $category->description }}</p>
+                </div>
 
-<body>
-    <h1>Category Details</h1>
+                <!-- Mostrar productos asociados -->
+                <div class="mb-4">
+                    <h3 class="h5">Products in this Category:</h3>
+                    <ul class="list-group">
+                        @forelse($products as $product)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ $product->name }}
+                                <span class="badge bg-primary rounded-pill">${{ $product->price }}</span>
+                            </li>
+                        @empty
+                            <li class="list-group-item">No products found.</li>
+                        @endforelse
+                    </ul>
+                </div>
 
-    <!-- Mostrar detalles de la categoría -->
-    <h2>Category: {{ $category->name }}</h2>
-    <p>{{ $category->description }}</p>
-
-    <!-- Mostrar productos asociados -->
-    <h3>Products in this Category:</h3>
-    <ul>
-        @forelse($products as $product)
-            <li>{{ $product->name }} - ${{ $product->price }}</li>
-        @empty
-            <li>No products found.</li>
-        @endforelse
-    </ul>
-
-    <a href="{{ route('categories.index') }}">Back to Categories</a>
-
-    <!-- Puedes agregar más contenido aquí -->
-</body>
-
-</html>
+                <div class="text-center">
+                    <a href="{{ route('categories.index') }}" class="btn btn-secondary">Back to Categories</a>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection

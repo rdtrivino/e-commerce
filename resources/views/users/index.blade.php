@@ -2,7 +2,12 @@
 
 @section('content')
     <div class="container">
-        <h1 class="text-center mb-4">Users</h1>
+        <div class="d-flex justify-content-start mb-4">
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary" title="Volver al Dashboard">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+        <h1 class="text-center mb-4">Usuarios</h1>
         <div class="d-flex justify-content-center mb-4">
             <a href="{{ route('users.create') }}" class="btn btn-primary">Crear Usuario</a>
         </div>
