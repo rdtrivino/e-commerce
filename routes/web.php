@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [IndexController::class, 'index'])->name('home');
 
 // Ruta para mostrar un producto público
-Route::get('products/public/{id}', [ProductController::class, 'showPublic'])->name('products.showPublic');
+Route::get('/products/{id}', [ProductController::class, 'showPublic'])->name('products.showPublic');
 
 // Rutas de autenticación
 Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -97,5 +97,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/cart/add', [CartController::class, 'add']);
         Route::get('/cart/count', [CartController::class, 'count']);
         Route::get('/cart/items', [CartController::class, 'items']);
+        Route::post('/cart/update/{id}', [CartController::class, 'update']);
+        Route::delete('/cart/remove/{id}', [CartController::class, 'remove']);
+        Route::delete('/cart/clear', [CartController::class, 'clear']);
     });
 });

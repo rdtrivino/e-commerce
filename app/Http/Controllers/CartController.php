@@ -9,6 +9,7 @@ use App\Models\Product;
 
 class CartController extends Controller
 {
+    // Método para agregar un producto al carrito
     public function add(Request $request)
     {
         $user = $request->user();
@@ -30,9 +31,10 @@ class CartController extends Controller
             ]);
         }
 
-        return response()->json(['success' => 'Producto añadido al carrito.']);
+        return response()->json(['success' => true]);
     }
 
+    // Método para obtener el conteo de productos en el carrito
     public function count(Request $request)
     {
         $user = $request->user();
@@ -43,6 +45,7 @@ class CartController extends Controller
         return response()->json(['count' => $count]);
     }
 
+    // Método para obtener los elementos del carrito
     public function items(Request $request)
     {
         $user = $request->user();
@@ -50,12 +53,60 @@ class CartController extends Controller
 
         $items = $cart ? $cart->items->map(function ($item) {
             return [
+                'id' => $item->id,
                 'name' => $item->product->name,
                 'quantity' => $item->quantity,
                 'price' => $item->product->price,
+                'image' => $item->product->image_path,
             ];
         }) : [];
 
-        return response()->json(['items' => $items]);
+        $total = $items->sum(function ($item) {
+            return $item['price'] * $item['quantity'];
+        });
+
+        return response()->json(['items' => $items, 'total' => $total]);
+    }
+
+    // Método para actualizar la cantidad de un producto en el carrito
+    public function update(Request $request, $id)
+    {
+        $cartItem = CartItem::findOrFail($id);
+        $quantityChange = $request->input('quantity_change');
+
+        if ($quantityChange === 'increase') {
+            $cartItem->increment('quantity');
+        } elseif ($quantityChange === 'decrease') {
+            $cartItem->decrement('quantity');
+
+            // Elimina el artículo si la cantidad se reduce a 0 o menos
+            if ($cartItem->quantity <= 0) {
+                $cartItem->delete();
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    // Método para eliminar un producto del carrito
+    public function remove($id)
+    {
+        $cartItem = CartItem::findOrFail($id);
+        $cartItem->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    // Método para vaciar el carrito
+    public function clear(Request $request)
+    {
+        $user = $request->user();
+        $cart = Cart::where('user_id', $user->id)->first();
+
+        if ($cart) {
+            $cart->items()->delete();
+        }
+
+        return response()->json(['success' => true]);
     }
 }
