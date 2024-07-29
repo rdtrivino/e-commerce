@@ -1,0 +1,163 @@
+body {
+	background: linear-gradient(to right, #f0f0f0, #4f4f4f);
+	min-height: 100vh;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.navbar {
+	position: relative;
+	margin-bottom: 20px;
+}
+
+.navbar-nav {
+	flex-direction: row;
+}
+
+.navbar-toggler {
+	border: none;
+}
+
+.search-form-container {
+	position: absolute;
+	top: 65%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 100%;
+	max-width: 500px;
+	z-index: 1;
+}
+
+.search-form-container .form-inline {
+	display: flex;
+	justify-content: center;
+}
+
+.navbar-brand {
+	position: relative;
+	z-index: 2;
+}
+
+.categories h2 {
+	margin-top: 30px;
+	margin-bottom: 20px;
+	font-size: 24px;
+	color: #333;
+	text-transform: uppercase;
+}
+
+.swiper-container {
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+	display: flex;
+	margin-left: -50px;
+}
+
+.swiper-wrapper {
+	display: flex;
+	margin-left: 3%;
+}
+
+.swiper-slide {
+	display: flex;
+	justify-content: center;
+	margin: 0 -10px; /* Espacio entre las tarjetas */
+}
+
+.card {
+	border: none;
+	border-radius: 10px;
+	overflow: hidden;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	transition: transform 0.3s, box-shadow 0.3s;
+	height: 100%; /* Ajustar altura según sea necesario */
+	width: 270px; /* Ajustar anchura según sea necesario */
+}
+
+.card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-img-top {
+	object-fit: cover;
+	height: 120px; /* Ajustar altura de la imagen según sea necesario */
+	width: 100%;
+}
+
+.card-body {
+	padding: 10px; /* Ajustar el padding según sea necesario */
+}
+
+.card-title {
+	font-size: 16px; /* Ajustar el tamaño de la fuente según sea necesario */
+	font-weight: bold;
+	margin-bottom: 8px;
+	color: #333;
+}
+
+.card-text {
+	font-size: 12px; /* Ajustar el tamaño de la fuente según sea necesario */
+	color: #666;
+	margin-bottom: 10px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.card-footer {
+	background-color: #f8f9fa;
+	border-top: 1px solid #e9ecef;
+	padding: 10px;
+	text-align: center;
+}
+
+.btn-primary {
+	background-color: #007bff;
+	border: none;
+	border-radius: 4px;
+	padding: 8px 12px;
+	font-size: 14px;
+	transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+	background-color: #0056b3;
+}
+
+.btn-primary:focus,
+.btn-primary.focus {
+	box-shadow: none;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+	color: #0b2dee; /* Cambiar color de las flechas */
+	margin-top: -30px; /* Ajustar la posición vertical de las flechas */
+}
+
+footer {
+	background: #333;
+	color: #fff;
+	padding: 20px 0;
+	text-align: center;
+	margin-top: 40px;
+}
+
+footer a {
+	color: #fff;
+	text-decoration: none;
+}
+
+footer a:hover {
+	text-decoration: underline;
+}
+
+.category-name {
+	text-align: center;
+	margin-top: 20px;
+	font-size: 1.5em;
+	font-weight: bold;
+}
