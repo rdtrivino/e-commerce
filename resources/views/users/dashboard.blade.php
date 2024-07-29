@@ -19,10 +19,6 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Categorías
-                        </a>
                         <div class="dropdown-menu" aria-labelledby="categoryDropdown">
                             @foreach ($categories as $category)
                                 <a class="dropdown-item category-item" href="#"
@@ -63,55 +59,54 @@
             <h1>Mi Tienda</h1>
         </div>
 
-        <div class="text-center mb-4">
-            <h2 id="category-name">{{ $categories->isNotEmpty() ? $categories->first()->name : '' }}</h2>
-        </div>
-
+        <!-- Muestra productos de todas las categorías -->
         <div class="row" id="product-list">
-            @if ($categories->isNotEmpty())
-                @php
-                    $category = $categories->first();
-                @endphp
-                @forelse($category->products as $product)
-                    <div class="col-md-4 mb-4 product-item">
-                        <div class="card">
-                            <img src="{{ $product->image_url }}" class="card-img-top" alt="{{ $product->name }}">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ $product->name }}</h5>
-                                <p class="card-text">{{ Str::limit($product->description, 100) }}</p>
-                                <p class="card-text">${{ $product->price }}</p>
+            @forelse($categories as $category)
+                <div class="col-md-12 mb-4">
+                    <h2>{{ $category->name }}</h2>
+                    <div class="row">
+                        @forelse($category->products as $product)
+                            <div class="col-md-4 mb-4 product-item">
+                                <div class="card">
+                                    <img src="{{ $product->image_url }}" class="card-img-top" alt="{{ $product->name }}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ $product->name }}</h5>
+                                        <p class="card-text">{{ Str::limit($product->description, 100) }}</p>
+                                        <p class="card-text">${{ $product->price }}</p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="{{ route('products.showPublic', $product->id) }}" class="btn btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <button class="btn btn-success add-to-cart" data-id="{{ $product->id }}">
+                                            <i class="fas fa-cart-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="card-footer">
-                                <a href="{{ route('products.showPublic', $product->id) }}" class="btn btn-primary">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <button class="btn btn-success add-to-cart" data-id="{{ $product->id }}">
-                                    <i class="fas fa-cart-plus"></i>
-                                </button>
-                            </div>
-                        </div>
+                        @empty
+                            <p>No hay productos en esta categoría.</p>
+                        @endforelse
                     </div>
-                @empty
-                    <p>No hay productos en esta categoría.</p>
-                @endforelse
-            @else
+                </div>
+            @empty
                 <p>No hay categorías disponibles.</p>
-            @endif
+            @endforelse
         </div>
 
         <footer class="text-center mt-4">
             <p>&copy; 2024 Tienda Ruben. Todos los derechos reservados.</p>
         </footer>
 
-        <!-- Botón del carrito flotante -->
+        <!-- Botón del carrito flotante en la parte superior derecha -->
         <button class="btn btn-primary cart-btn" data-toggle="modal" data-target="#cartModal">
-            <i class="fas fa-shopping-cart"></i> <span class="badge badge-light" id="cart-count">0</span>
+            <i class="fas fa-shopping-cart"></i>
         </button>
 
         <!-- Modal del carrito -->
         <div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-labelledby="cartModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="cartModalLabel">Carrito de Compras</h5>
@@ -121,8 +116,11 @@
                     </div>
                     <div class="modal-body">
                         <ul class="list-group" id="cart-items">
-                            <li class="list-group-item">No hay productos en el carrito.</li>
+                            <li class="list-group-item text-center">No hay productos en el carrito.</li>
                         </ul>
+                        <div class="text-right mt-3">
+                            <h5>Total: $<span id="cart-modal-total">0.00</span></h5>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -130,17 +128,25 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <style>
-        .cart-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            border-radius: 50%;
-            padding: 15px;
-            font-size: 18px;
-        }
-    </style>
+        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="successModalLabel">¡Éxito!</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="success-icon">
+                            <i class="fas fa-check-circle fa-4x text-success"></i>
+                        </div>
+                        <p class="mt-3">El producto ha sido añadido al carrito exitosamente.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

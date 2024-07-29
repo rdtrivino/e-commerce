@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 
-    @vite(['resources/sass/app.scss', 'resources/js/app.js', 'resources/js/buscador.js', 'resources/css/index_publi.css'])
+    @vite(['resources/sass/app.scss', 'resources/js/app.js', 'resources/js/buscador.js', 'resources/css/index_publi.css', 'resources/css/carrito.css', 'resources/js/carrito.js'])
 </head>
 
 <body>

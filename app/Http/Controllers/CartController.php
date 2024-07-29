@@ -3,83 +3,59 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Product;
 
 class CartController extends Controller
 {
-    public function addToCart(Request $request)
+    public function add(Request $request)
     {
-        // Validar que el producto ID esté presente en la solicitud
-        $request->validate([
-            'product_id' => 'required|exists:products,id'
-        ]);
+        $user = $request->user();
+        $product = Product::findOrFail($request->input('product_id'));
 
-        $product = Product::find($request->product_id);
-        $cart = session()->get('cart', []);
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
 
-        // Verificar si el producto ya está en el carrito
-        if (isset($cart[$product->id])) {
-            $cart[$product->id]['quantity']++;
+        $cartItem = CartItem::where('cart_id', $cart->id)
+            ->where('product_id', $product->id)
+            ->first();
+
+        if ($cartItem) {
+            $cartItem->increment('quantity');
         } else {
-            // Agregar el producto al carrito
-            $cart[$product->id] = [
-                'name' => $product->name,
+            CartItem::create([
+                'cart_id' => $cart->id,
+                'product_id' => $product->id,
                 'quantity' => 1,
-                'price' => $product->price,
-                'image' => $product->image_url
+            ]);
+        }
+
+        return response()->json(['success' => 'Producto añadido al carrito.']);
+    }
+
+    public function count(Request $request)
+    {
+        $user = $request->user();
+        $cart = Cart::where('user_id', $user->id)->first();
+
+        $count = $cart ? $cart->items->sum('quantity') : 0;
+
+        return response()->json(['count' => $count]);
+    }
+
+    public function items(Request $request)
+    {
+        $user = $request->user();
+        $cart = Cart::where('user_id', $user->id)->first();
+
+        $items = $cart ? $cart->items->map(function ($item) {
+            return [
+                'name' => $item->product->name,
+                'quantity' => $item->quantity,
+                'price' => $item->product->price,
             ];
-        }
+        }) : [];
 
-        // Actualizar la sesión con el carrito actualizado
-        session()->put('cart', $cart);
-
-        return response()->json(['success' => 'Producto agregado al carrito.']);
-    }
-
-    public function viewCart()
-    {
-        $cart = session()->get('cart', []);
-        return view('cart.view', compact('cart'));
-    }
-
-    public function updateCart(Request $request)
-    {
-        // Validar la solicitud
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1'
-        ]);
-
-        $cart = session()->get('cart', []);
-
-        // Verificar si el producto está en el carrito
-        if (isset($cart[$request->product_id])) {
-            // Actualizar la cantidad del producto
-            $cart[$request->product_id]['quantity'] = $request->quantity;
-            session()->put('cart', $cart);
-            return response()->json(['success' => 'Cantidad del producto actualizada.']);
-        }
-
-        return response()->json(['error' => 'Producto no encontrado en el carrito.'], 404);
-    }
-
-    public function removeFromCart(Request $request)
-    {
-        // Validar la solicitud
-        $request->validate([
-            'product_id' => 'required|exists:products,id'
-        ]);
-
-        $cart = session()->get('cart', []);
-
-        // Verificar si el producto está en el carrito
-        if (isset($cart[$request->product_id])) {
-            // Remover el producto del carrito
-            unset($cart[$request->product_id]);
-            session()->put('cart', $cart);
-            return response()->json(['success' => 'Producto removido del carrito.']);
-        }
-
-        return response()->json(['error' => 'Producto no encontrado en el carrito.'], 404);
+        return response()->json(['items' => $items]);
     }
 }

@@ -72,16 +72,6 @@ Route::middleware('auth')->group(function () {
     // Ruta para mostrar una categoría específica
     Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category');
 
-    // Rutas de recursos de órdenes
-    Route::resource('orders', OrderController::class)->names([
-        'index' => 'orders.index',
-        'create' => 'orders.create',
-        'store' => 'orders.store',
-        'show' => 'orders.show',
-        'edit' => 'orders.edit',
-        'update' => 'orders.update',
-        'destroy' => 'orders.destroy',
-    ]);
 
     // Ruta para actualizar el avatar del usuario
     Route::put('/user/avatar', [UserController::class, 'updateAvatar'])->name('user.update.avatar');
@@ -102,9 +92,10 @@ Route::middleware('auth')->group(function () {
         return view('admin.dashboard');
     })->middleware('role:admin')->name('admin.dashboard');
 
-    // Rutas del carrito de compras
-    Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
-    Route::get('/cart', [CartController::class, 'viewCart'])->name('cart.view');
-    Route::post('/cart/remove', [CartController::class, 'removeFromCart'])->name('cart.remove');
-    Route::post('/order/create', [OrderController::class, 'createOrder'])->name('order.create');
+    // Rutas del carrito
+    Route::middleware('auth')->group(function () {
+        Route::post('/cart/add', [CartController::class, 'add']);
+        Route::get('/cart/count', [CartController::class, 'count']);
+        Route::get('/cart/items', [CartController::class, 'items']);
+    });
 });

@@ -9,8 +9,10 @@ export default defineConfig({
 				'resources/sass/app.scss',
 				'resources/css/index_publi.css',
 				'resources/css/admin.css',
+				'resources/css/carrito.css',
 				'resources/js/app.js',
-				'resources/js/buscador.js'
+				'resources/js/buscador.js',
+				'resources/js/carrito.js'
 			],
 			refresh: true
 		}),
