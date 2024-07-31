@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class UserController extends Controller
 {
@@ -19,7 +20,11 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::all();
-        return view('users.create', compact('roles'));
+
+        // Obtener avatares predefinidos desde la base de datos
+        $avatars = Media::where('collection_name', 'avatars')->get();
+
+        return view('users.create', compact('roles', 'avatars'));
     }
 
     public function store(Request $request)
@@ -28,8 +33,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|exists:roles,name', // Validar rol
-            'avatar' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048', // Validar avatar
+            'role' => 'required|exists:roles,name',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -42,11 +47,14 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $user->assignRole($request->role);
-
         if ($request->hasFile('avatar')) {
-            $user->setAvatar($request->file('avatar'));
+            $user->addMedia($request->file('avatar'))->toMediaCollection('avatars');
+        } elseif ($request->input('avatar')) {
+            $avatarUrl = $request->input('avatar');
+            $this->savePredefinedAvatar($user, $avatarUrl);
         }
+
+        $user->assignRole($request->role);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
@@ -58,15 +66,10 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $roles = Role::all(); 
+        $roles = Role::all();
 
-
-        $avatars = [
-            ['url' => 'https://example.com/avatar1.png', 'name' => 'Avatar 1'],
-            ['url' => 'https://example.com/avatar2.png', 'name' => 'Avatar 2'],
-            ['url' => 'https://example.com/avatar3.png', 'name' => 'Avatar 3'],
-        ];
-
+        // Obtener avatares predefinidos desde la base de datos
+        $avatars = Media::where('collection_name', 'avatars')->get();
 
         return view('users.edit', compact('user', 'roles', 'avatars'));
     }
@@ -77,8 +80,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|exists:roles,name', // Validar rol
-            'avatar' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048', // Validar avatar
+            'role' => 'required|exists:roles,name',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -91,11 +94,16 @@ class UserController extends Controller
             'password' => $request->password ? Hash::make($request->password) : $user->password,
         ]);
 
-        $user->syncRoles($request->role);
-
         if ($request->hasFile('avatar')) {
-            $user->setAvatar($request->file('avatar'));
+            // Eliminar el avatar antiguo si existe
+            $user->clearMediaCollection('avatars');
+            $user->addMedia($request->file('avatar'))->toMediaCollection('avatars');
+        } elseif ($request->input('avatar')) {
+            $avatarUrl = $request->input('avatar');
+            $this->savePredefinedAvatar($user, $avatarUrl);
         }
+
+        $user->syncRoles($request->role);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
@@ -104,5 +112,25 @@ class UserController extends Controller
     {
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+    }
+
+    /**
+     * Guarda un avatar predefinido en el usuario.
+     *
+     * @param User $user
+     * @param string $avatarUrl
+     * @return void
+     */
+    protected function savePredefinedAvatar(User $user, $avatarUrl)
+    {
+        // Descargar la imagen desde la URL y agregarla a la colección de medios
+        $imageContent = file_get_contents($avatarUrl);
+        $tempImagePath = storage_path('app/public/' . basename($avatarUrl));
+        file_put_contents($tempImagePath, $imageContent);
+
+        $user->addMedia($tempImagePath)->toMediaCollection('avatars');
+
+        // Elimina el archivo temporal después de subirlo
+        unlink($tempImagePath);
     }
 }

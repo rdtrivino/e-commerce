@@ -50,7 +50,8 @@
                                     <label for="role">Rol</label>
                                     <select name="role" id="role" class="form-control" required>
                                         @foreach ($roles as $role)
-                                            <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
+                                            <option value="{{ $role->name }}"
+                                                {{ $user->hasRole($role->name) ? 'selected' : '' }}>
                                                 {{ $role->name }}
                                             </option>
                                         @endforeach
@@ -58,27 +59,26 @@
                                 </div>
 
                                 <!-- Avatar -->
-                                {{-- <div class="form-group">
-                                <label for="avatar">Selecciona un Avatar</label>
-                                <div class="form-check">
-                                    @foreach ($avatars as $avatar)
-                                        <div class="form-check">
-                                            <input type="radio" name="avatar" id="avatar{{ $loop->index }}"
-                                                value="{{ $avatar['url'] }}" class="form-check-input"
-                                                {{ $user->avatar === $avatar['url'] ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="avatar{{ $loop->index }}">
-                                                <img src="{{ $avatar['url'] }}" alt="Avatar {{ $loop->index }}"
-                                                    class="img-thumbnail" width="50">
-                                            </label>
-                                        </div>
-                                    @endforeach
+                                <div class="form-group">
+                                    <label for="avatar">Selecciona un Avatar</label>
+                                    <select name="avatar" id="avatar" class="form-control">
+                                        <option value="">-- Selecciona un avatar --</option>
+                                        @foreach ($avatars as $avatar)
+                                            <option value="{{ $avatar->getUrl() }}"
+                                                {{ $user->hasMedia('avatars') && $user->getFirstMediaUrl('avatars') === $avatar->getUrl() ? 'selected' : '' }}
+                                                data-image="{{ $avatar->getUrl() }}">
+                                                <img src="{{ $avatar->getUrl() }}" alt="{{ $avatar->name }}"
+                                                    width="50" style="margin-right: 10px;">
+                                                {{ $avatar->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <img id="selected-avatar" src="{{ $user->getFirstMediaUrl('avatars') }}"
+                                        alt="User Avatar" class="img-thumbnail mt-2" width="100"
+                                        style="display: {{ $user->hasMedia('avatars') ? 'block' : 'none' }};">
+                                    <input type="file" name="custom_avatar" id="custom_avatar"
+                                        class="form-control-file mt-2">
                                 </div>
-                                <input type="file" name="custom_avatar" id="custom_avatar" class="form-control-file mt-2">
-                                @if ($user->getAvatarUrl())
-                                    <img src="{{ $user->getAvatarUrl() }}" alt="User Avatar" class="img-thumbnail mt-2"
-                                        width="100">
-                                @endif
-                            </div> --}}
 
                                 <div class="form-group text-center">
                                     <button type="submit" class="btn btn-primary">Guardar</button>
@@ -90,4 +90,21 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            document.getElementById('avatar').addEventListener('change', function() {
+                const selectedAvatar = this.options[this.selectedIndex];
+                const imageUrl = selectedAvatar.getAttribute('data-image');
+                const imgElement = document.getElementById('selected-avatar');
+
+                if (imageUrl) {
+                    imgElement.src = imageUrl;
+                    imgElement.style.display = 'block';
+                } else {
+                    imgElement.style.display = 'none';
+                }
+            });
+        </script>
+    @endpush
 @endsection

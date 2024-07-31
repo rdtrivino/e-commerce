@@ -35,7 +35,8 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('home');
+        // Redirige a la raíz después de cerrar sesión
+        return redirect('/');
     }
 
     protected function redirectToDashboard()
@@ -46,7 +47,7 @@ class AuthenticatedSessionController extends Controller
             if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->role === 'user') {
-                return redirect()->route('user.dashboard');
+                return redirect()->route('index');
             }
         }
 

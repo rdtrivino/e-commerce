@@ -3,11 +3,11 @@
 @section('content')
     <header>
         <h1>Admin Dashboard</h1>
-        <nav>
+        <nav class="admin-nav">
             <a href="{{ route('products.index') }}">Productos</a>
-            <a href="{{ route('categories.index') }}">Categories</a>
-            <a href="{{ route('orders.index') }}">Orders</a>
-            <a href="{{ route('users.index') }}">Users</a>
+            <a href="{{ route('categories.index') }}">Categorías</a>
+            <a href="{{ route('orders.index') }}">Órdenes</a>
+            <a href="{{ route('users.index') }}">Usuarios</a>
         </nav>
         <div>
             <a class="logout-link" href="{{ route('logout') }}"

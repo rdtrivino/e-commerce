@@ -17,10 +17,11 @@
                         </div>
                         <div class="card-body">
                             <div class="text-center mb-3">
-                                @if($user->avatar_url)
-                                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="img-fluid rounded-circle" style="width: 150px; height: 150px;">
+                                @if ($user->avatar_url)
+                                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}"
+                                        class="img-fluid rounded-circle" style="width: 150px; height: 150px;">
                                 @else
-                                    <img src="path/to/default/avatar.png" alt="Default Avatar" class="img-fluid rounded-circle" style="width: 150px; height: 150px;">
+                                    <img src="{{ Auth::user()->avatar }}" alt="User Avatar" class="user-avatar">
                                 @endif
                             </div>
                             <div class="mb-3">

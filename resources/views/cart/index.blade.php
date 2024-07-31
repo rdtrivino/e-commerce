@@ -1,84 +1,76 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
-        <h1>Carrito de Compras</h1>
-        @if (session('cart'))
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Total</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (session('cart') as $id => $details)
+    <div class="container mt-5">
+        <h1 class="mb-4 text-center">Tu Carrito</h1>
+
+        @if ($cartItems->count() > 0)
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead class="bg-primary text-white">
                         <tr>
-                            <td>{{ $details['name'] }}</td>
-                            <td>
-                                <input type="number" value="{{ $details['quantity'] }}" class="form-control quantity" />
-                            </td>
-                            <td>${{ $details['price'] }}</td>
-                            <td>${{ $details['price'] * $details['quantity'] }}</td>
-                            <td>
-                                <button class="btn btn-info btn-sm update-cart"
-                                    data-id="{{ $id }}">Actualizar</button>
-                                <button class="btn btn-danger btn-sm remove-from-cart"
-                                    data-id="{{ $id }}">Eliminar</button>
-                            </td>
+                            <th>Imagen</th>
+                            <th>Nombre</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Total</th>
+                            <th>Acción</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            <div>
-                <strong>Total: ${{ array_sum(array_column(session('cart'), 'price')) }}</strong>
+                    </thead>
+                    <tbody>
+                        @foreach ($cartItems as $item)
+                            <tr>
+                                <td><img src="{{ $item->attributes->image }}" alt="{{ $item->name }}" class="img-thumbnail"
+                                        width="80"></td>
+                                <td>{{ $item->name }}</td>
+                                <td>{{ $item->quantity }}</td>
+                                <td>${{ number_format($item->price, 2) }}</td>
+                                <td>${{ number_format($item->getPriceSum(), 2) }}</td>
+                                <td>
+                                    <form action="{{ route('cart.remove', $item->id) }}" method="POST"
+                                        class="d-inline-block">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-trash" onclick="showLoginAlert();"></i> Eliminar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                <h3 class="mt-4 text-right font-weight-bold">Total: ${{ number_format($total, 2) }}</h3>
             </div>
         @else
-            <p>El carrito está vacío.</p>
+            <p class="text-center text-muted">Tu carrito está vacío.</p>
         @endif
     </div>
 @endsection
 
-@section('scripts')
-    <script type="text/javascript">
-        $(".update-cart").click(function(e) {
-            e.preventDefault();
-            var ele = $(this);
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
 
-            $.ajax({
-                url: '{{ route('cart.update') }}',
-                method: "post",
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    product_id: ele.attr("data-id"),
-                    quantity: ele.parents("tr").find(".quantity").val()
-                },
-                success: function(response) {
-                    window.location.reload();
-                }
-            });
-        });
-
-        $(".remove-from-cart").click(function(e) {
-            e.preventDefault();
-            var ele = $(this);
-
-            if (confirm("¿Estás seguro de que quieres eliminar este producto?")) {
-                $.ajax({
-                    url: '{{ route('cart.remove') }}',
-                    method: "post",
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        product_id: ele.attr("data-id")
-                    },
-                    success: function(response) {
-                        window.location.reload();
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: '¡No podrás revertir esto!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#007bff',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, eliminarlo!',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.submit();
                     }
                 });
-            }
+            });
         });
     </script>
-@endsection
+@endpush

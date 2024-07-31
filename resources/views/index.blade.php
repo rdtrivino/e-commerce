@@ -2,72 +2,91 @@
 
 @section('content')
     <div class="container mt-2">
-        <nav class="navbar navbar-expand-lg navbar-light"
-            style="background: linear-gradient(to right, rgba(150, 200, 150, 0.9), rgba(255, 212, 200, 0.9)); border-radius: 10px; padding: 10px;">
-            <a class="navbar-brand" href="#">Tienda Ruben</a>
+        <div class="text-center mb-3">
+            <h1 class="display-4 font-weight-bold">Mi Tienda</h1>
+            <p class="lead text-muted">Encuentra los mejores productos aquí</p>
+        </div>
 
-            <div class="search-form-container">
-                <form class="form-inline" id="search-form" action="{{ route('search.live') }}" method="GET">
-                    <input class="form-control mr-sm-2" type="search" placeholder="Buscar productos" aria-label="Buscar"
-                        name="query" id="search-input" value="{{ request()->input('query') }}">
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit"><i
-                            class="fa fa-search"></i></button>
+        <div class="row mb-4">
+            <div class="col-md-6 mx-auto">
+                <form action="{{ route('index') }}" method="GET">
+                    <div class="input-group">
+                        <input type="search" class="form-control" placeholder="Buscar productos" aria-label="Buscar"
+                            name="query" id="search-input" value="{{ request()->input('query') }}">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary search-btn" type="submit">
+                                <i class="bi bi-search" style="font-size: 1.2rem;"></i>
+                            </button>
+                        </div>
+                    </div>
                 </form>
                 <div id="search-results" class="mt-3"></div>
             </div>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('login') }}">
-                            <i class="fas fa-user"></i> INICIAR SESIÓN
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
-        <div class="text-center mb-4">
-            <h1> Mi Tienda</h1>
         </div>
+        @if ($products->isNotEmpty())
+            <div class="mb-5">
+                @if ($categoryId)
+                    <h2 class="text-primary font-weight-bold mb-3">Categoría: {{ $categories->find($categoryId)->name }}
+                    </h2>
+                @else
+                    <h2 class="text-primary font-weight-bold mb-3">Todos los Productos</h2>
+                @endif
 
-        <div class="categories" id="product-list">
-            @foreach ($categories as $category)
-                <h2 class="category-name">{{ $category->name }}</h2>
-
-                <div class="swiper-container">
-                    <div class="swiper-wrapper" id="categories-container">
-                        @forelse($category->products as $product)
-                            <div class="swiper-slide">
-                                <div class="card">
-                                    <img src="{{ $product->image_url }}" class="card-img-top" alt="{{ $product->name }}">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ $product->name }}</h5>
-                                        <p class="card-text">{{ Str::limit($product->description, 100) }}</p>
-                                        <p class="card-text">${{ $product->price }}</p>
-                                    </div>
-                                    <div class="card-footer">
+                <div class="row">
+                    @foreach ($products as $product)
+                        <div class="col-md-4 mb-3">
+                            <div class="card shadow-sm border-light rounded">
+                                <img src="{{ $product->image_url }}" class="card-img-top" alt="{{ $product->name }}"
+                                    style="max-height: 200px; object-fit: cover;">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ $product->name }}</h5>
+                                    <p class="card-text">{{ Str::limit($product->description, 80) }}</p>
+                                    <p class="card-text font-weight-bold text-primary">${{ $product->price }}</p>
+                                    <div class="d-flex justify-content-center">
+                                        @auth
+                                            <form action="{{ route('cart.add', $product->id) }}" method="POST" class="me-2">
+                                                @csrf
+                                                <button type="submit" class="btn btn-success btn-sm">
+                                                    <i class="bi bi-cart" style="font-size: 1.2rem;"></i>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <button class="btn btn-danger btn-sm me-2" onclick="showLoginAlert();">
+                                                <i class="bi bi-cart" style="font-size: 1rem;"></i>
+                                            </button>
+                                        @endauth
                                         <a href="{{ route('products.showPublic', $product->id) }}"
-                                            class="btn btn-primary">Ver Producto</a>
+                                            class="btn btn-primary btn-sm">
+                                            <i class="bi bi-eye" style="font-size: 1rem;"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
-                        @empty
-                            <p>No hay productos en esta categoría.</p>
-                        @endforelse
-                    </div>
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
+                        </div>
+                    @endforeach
                 </div>
-            @endforeach
-        </div>
+            </div>
+        @else
+            <p class="text-muted">No hay productos disponibles.</p>
+        @endif
 
-        <footer class="text-center mt-4">
+        <footer class="text-center mt-5">
             <p>&copy; 2024 Tienda Ruben. Todos los derechos reservados.</p>
         </footer>
     </div>
-    <script>
-        const searchLiveUrl = '{{ route('search.live') }}';
-        const productsPublicUrl = '{{ url('products/public') }}';
-    </script>
+
+    @vite(['resources/css/index_publi.css'])
+
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            function showLoginAlert() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Por favor, inicie sesión para agregar productos al carrito.',
+                });
+            }
+        </script>
+    @endpush
 @endsection

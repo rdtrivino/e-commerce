@@ -6,15 +6,11 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Darryldecode\Cart\Facades\CartFacade as Cart;
 
 class ProductController extends Controller
 {
-    public function index()
-    {
-        $products = Product::paginate(5);
-        return view('products.index', compact('products'));
-    }
-
     public function create()
     {
         $categories = Category::all();
@@ -42,11 +38,16 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')->with('success', 'Producto creado exitosamente');
     }
+
     public function showPublic($id)
     {
         $product = Product::findOrFail($id);
-        return view('products.show_public', compact('product'));
+        $categories = Category::all();
+        $cartCount = $this->getCartCount();
+
+        return view('products.show_public', compact('product', 'categories', 'cartCount'));
     }
+
     public function show(Product $product)
     {
         return view('products.show', compact('product'));
@@ -91,6 +92,12 @@ class ProductController extends Controller
         }
 
         $product->delete();
+
         return redirect()->route('products.index')->with('success', 'Producto eliminado exitosamente');
+    }
+
+    private function getCartCount()
+    {
+        return Cart::getTotalQuantity();
     }
 }
