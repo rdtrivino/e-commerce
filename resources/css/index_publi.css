@@ -1,5 +1,9 @@
 body {
-	background: linear-gradient(to right, #f0f0f0, #4f4f4f);
+	background: linear-gradient(
+		to right,
+		rgba(234, 227, 225, 0.9),
+		rgba(143, 144, 142, 0.9)
+	);
 	min-height: 100vh;
 	margin: 0;
 	display: flex;
@@ -160,4 +164,17 @@ footer a:hover {
 	margin-top: 20px;
 	font-size: 1.5em;
 	font-weight: bold;
+}
+.custom-icon {
+	color: #0a0b0b;
+	font-size: 1.25rem;
+}
+
+.search-btn {
+	background-color: #007bff;
+	border: none;
+}
+
+.search-btn .bi-search {
+	color: white;
 }

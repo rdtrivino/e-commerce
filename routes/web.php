@@ -1,27 +1,36 @@
 <?php
 
-use App\Http\Controllers\IndexController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\UserDashboardController;
-use App\Http\Controllers\CartController;
+use App\Http\Controllers\{
+    IndexController,
+    ProductController,
+    CategoryController,
+    UserController,
+    Auth\RegisteredUserController,
+    Auth\PasswordResetLinkController,
+    Auth\AuthenticatedSessionController,
+    CartController,
+    UserDashboardController
+};
 use Illuminate\Http\Request;
-use App\Models\Product;
 use Illuminate\Support\Facades\Route;
+use App\Models\Product;
 
 // Ruta de la página de inicio
-Route::get('/', [IndexController::class, 'index'])->name('home');
+Route::get('/', [IndexController::class, 'index'])->name('index');
 
-// Ruta para mostrar un producto público
+// Rutas de productos
 Route::get('/products/{id}', [ProductController::class, 'showPublic'])->name('products.showPublic');
 
-// Rutas de autenticación
-Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
-Route::post('login', [AuthenticatedSessionController::class, 'store']);
-Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+// Rutas para el área de administración de productos
+Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+});
 
 // Ruta de búsqueda
 Route::get('/search/live', function (Request $request) {
@@ -33,50 +42,49 @@ Route::get('/search/live', function (Request $request) {
     return response()->json(['products' => $products]);
 })->name('search.live');
 
-// Ruta para cambiar de categoría y mostrar productos
+// Rutas de categorías
+Route::get('/category/{id}', [CategoryController::class, 'showCategoryProducts'])->name('category.products');
+Route::get('/category/{category}', [CategoryController::class, 'show'])->name('category.show');
 Route::get('/categories/change', [CategoryController::class, 'change'])->name('categories.change');
+Route::get('/categories/{category}/products', [CategoryController::class, 'getProducts'])->name('category.products.list');
 
-// Ruta para obtener productos de una categoría específica
-Route::get('/categories/{category}/products', [CategoryController::class, 'getProducts']);
+// Rutas de autenticación
+Route::middleware('guest')->group(function () {
+    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+});
+
+// Ruta para el logout
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
 // Rutas protegidas por autenticación
 Route::middleware('auth')->group(function () {
+    // Dashboard para usuarios
+    Route::middleware('role:user')->group(function () {
+        Route::get('/user-dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    });
 
-    // Dashboard para Usuario
-    Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
-        ->middleware('role:user')
-        ->name('user.dashboard');
+    // Dashboard para administradores
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/admin/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
+    });
 
-    // Rutas de recursos de productos
-    Route::resource('products', ProductController::class)->names([
-        'index' => 'products.index',
-        'create' => 'products.create',
-        'store' => 'products.store',
-        'show' => 'products.show',
-        'edit' => 'products.edit',
-        'update' => 'products.update',
-        'destroy' => 'products.destroy',
-    ]);
+    // Rutas del carrito
+    Route::prefix('cart')->group(function () {
+        Route::post('/add/{id}', [CartController::class, 'add'])->name('cart.add');
+        Route::get('/', [CartController::class, 'index'])->name('cart.index');
+        Route::post('/update/{id}', [CartController::class, 'update'])->name('cart.update');
+        Route::delete('/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+        Route::delete('/clear', [CartController::class, 'clear'])->name('cart.clear');
+    });
 
-    // Rutas de recursos de categorías
-    Route::resource('categories', CategoryController::class)->names([
-        'index' => 'categories.index',
-        'create' => 'categories.create',
-        'store' => 'categories.store',
-        'show' => 'categories.show',
-        'edit' => 'categories.edit',
-        'update' => 'categories.update',
-        'destroy' => 'categories.destroy',
-    ]);
-
-    // Ruta para mostrar una categoría específica
-    Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category');
-
-
-    // Ruta para actualizar el avatar del usuario
-    Route::put('/user/avatar', [UserController::class, 'updateAvatar'])->name('user.update.avatar');
-
-    // Rutas de recursos de usuarios
+    // Rutas de recursos para usuarios
     Route::resource('users', UserController::class)->names([
         'index' => 'users.index',
         'create' => 'users.create',
@@ -87,18 +95,5 @@ Route::middleware('auth')->group(function () {
         'destroy' => 'users.destroy',
     ]);
 
-    // Dashboard para Administrador
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->middleware('role:admin')->name('admin.dashboard');
-
-    // Rutas del carrito
-    Route::middleware('auth')->group(function () {
-        Route::post('/cart/add', [CartController::class, 'add']);
-        Route::get('/cart/count', [CartController::class, 'count']);
-        Route::get('/cart/items', [CartController::class, 'items']);
-        Route::post('/cart/update/{id}', [CartController::class, 'update']);
-        Route::delete('/cart/remove/{id}', [CartController::class, 'remove']);
-        Route::delete('/cart/clear', [CartController::class, 'clear']);
-    });
+    Route::put('/user/avatar', [UserController::class, 'updateAvatar'])->name('user.update.avatar');
 });

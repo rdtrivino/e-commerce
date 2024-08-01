@@ -16,7 +16,6 @@ class User extends Authenticatable implements HasMedia
         'name',
         'email',
         'password',
-        'role', // Asegúrate de tener esta columna en la base de datos
     ];
 
     protected $hidden = [
@@ -29,20 +28,48 @@ class User extends Authenticatable implements HasMedia
     ];
 
     /**
-     * Set the user's avatar.
+     * Establece el avatar para el usuario.
      *
-     * @param  mixed  $avatar
+     * @param mixed $avatar
      * @return void
      */
     public function setAvatar($avatar)
     {
-        $this->clearMediaCollection('avatars'); // Limpiar la colección anterior si existe
-        $this->addMedia($avatar)
-            ->toMediaCollection('avatars');
+        if (is_string($avatar) && strpos($avatar, 'data:image/') === 0) {
+            // Si $avatar es una cadena base64, guarda el avatar en la colección de medios
+            $image = $this->base64ToImage($avatar);
+            $this->clearMediaCollection('avatars');
+            $this->addMedia($image)
+                ->toMediaCollection('avatars');
+        } elseif (is_file($avatar)) {
+            // Si $avatar es un archivo, simplemente añade el archivo
+            $this->clearMediaCollection('avatars');
+            $this->addMedia($avatar)
+                ->toMediaCollection('avatars');
+        }
     }
 
     /**
-     * Get the URL of the user's avatar.
+     * Convierte una cadena base64 en una imagen.
+     *
+     * @param string $base64String
+     * @return string
+     */
+    protected function base64ToImage($base64String)
+    {
+        $imageData = explode(',', $base64String);
+        $imageType = explode(';', explode(':', $imageData[0])[1])[0];
+        $imageData = base64_decode($imageData[1]);
+
+        $imageName = 'avatar.' . explode('/', $imageType)[1];
+        $path = storage_path('app/public/' . $imageName);
+        file_put_contents($path, $imageData);
+
+        return $path;
+    }
+
+    /**
+     * Obtiene la URL del avatar del usuario.
      *
      * @return string|null
      */

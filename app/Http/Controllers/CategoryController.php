@@ -9,14 +9,29 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    // Muestra todas las categorías
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::all();
-        return view('categories.index', compact('categories'));
-    }
+        $categoryId = $request->input('category_id');
+        $category = null;
+        $products = collect(); // Usamos collect() para inicializar como una colección vacía
 
-    // Muestra el formulario para crear una nueva categoría
+        if ($categoryId) {
+            $category = Category::find($categoryId);
+            if ($category) {
+                $products = $category->products; // Obtener productos de la categoría seleccionada
+            } else {
+                // Manejar el caso en que la categoría no existe, si es necesario
+                $products = collect(); // Asegurarse de que $products sea una colección vacía si no hay categoría
+            }
+        } else {
+            // Si no hay categoría seleccionada, puedes elegir mostrar todos los productos, o bien, dejar vacío
+            // Ejemplo: $products = Product::all(); si quieres mostrar todos los productos
+        }
+
+        $categories = Category::all(); // Obtener todas las categorías para el dropdown
+
+        return view('index', compact('categories', 'products', 'category'));
+    }
     public function create()
     {
         return view('categories.create');
@@ -32,8 +47,8 @@ class CategoryController extends Controller
     // Muestra una categoría específica junto con sus productos
     public function show(Category $category)
     {
-        $products = $category->products; // Asumiendo que tienes una relación de productos en tu modelo Category
-        return view('categories.show', compact('category', 'products'));
+        $products = $category->products;
+        return view('index', compact('category', 'products'));
     }
 
     // Muestra el formulario para editar una categoría existente
@@ -56,6 +71,15 @@ class CategoryController extends Controller
         return redirect()->route('categories.index');
     }
 
+    // Muestra los productos de una categoría específica
+    public function showCategoryProducts($id)
+    {
+        $category = Category::findOrFail($id);
+        $products = $category->products;
+
+        return view('category.products', compact('category', 'products'));
+    }
+
     // Obtiene los productos de una categoría específica y los devuelve en formato JSON
     public function getProducts(Category $category)
     {
@@ -63,19 +87,5 @@ class CategoryController extends Controller
             'category' => $category,
             'products' => $category->products,
         ]);
-    }
-
-    // Cambia la categoría actual y devuelve los productos correspondientes
-    public function change(Request $request)
-    {
-        $categoryId = $request->input('category_id');
-        $category = Category::find($categoryId);
-
-        if ($category) {
-            $products = $category->products;
-            return view('categories.show', compact('category', 'products'));
-        }
-
-        return redirect()->route('categories.index')->with('error', 'Categoría no encontrada.');
     }
 }

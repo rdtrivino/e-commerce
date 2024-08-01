@@ -1,87 +1,130 @@
-<!DOCTYPE html>
-<html lang="es">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $product->name }}</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+@section('content')
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 d-flex align-items-center">
+                <!-- Detalles del producto -->
+                <div class="row w-100">
+                    <!-- Imagen del producto -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card border-0 shadow-lg">
+                            <img src="{{ $product->image_url ?? 'https://via.placeholder.com/400x400' }}" class="card-img-top"
+                                alt="{{ $product->name }}">
+                        </div>
+                    </div>
+
+                    <!-- Detalles del producto y formulario -->
+                    <div class="col-md-6 d-flex align-items-center">
+                        <div class="card border-0 shadow-lg w-100">
+                            <div class="card-body">
+                                <h1 class="card-title mb-4 text-center">{{ $product->name }}</h1>
+                                <p class="card-text mb-4">{{ $product->description }}</p>
+                                <p class="card-text mb-4"><strong>Precio:</strong> ${{ number_format($product->price, 2) }}
+                                </p>
+
+                                <!-- Mostrar formulario solo si el usuario está autenticado -->
+                                @auth
+                                    <form action="{{ route('cart.add', $product->id) }}" method="POST" id="add-to-cart-form">
+                                        @csrf
+                                        <div class="d-flex align-items-center">
+                                            <!-- Contador de cantidad -->
+                                            <input type="number" id="qty" name="qty" class="form-control me-2"
+                                                value="1" min="1" max="100" style="max-width: 80px;">
+
+                                            <!-- Botón de agregar al carrito -->
+                                            <button type="submit" class="btn btn-primary rounded-pill shadow-sm">
+                                                <i class="bi bi-cart"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                @else
+                                    <!-- Mostrar mensaje o icono si el usuario no está autenticado -->
+                                    <p class="text-danger">Debes iniciar sesión para agregar productos al carrito.</p>
+                                @endauth
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('styles')
     <style>
-        body {
-            background: linear-gradient(to right, #f0f0f0, #4f4f4f);
-            min-height: 100vh;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        .card-img-top {
+            height: 250px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            /* Redondear bordes */
         }
 
-        .product-details {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            max-width: 800px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .product-details img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-        }
-
-        .product-details h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-
-        .product-details p {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-        }
-
-        .product-details .price {
-            font-size: 1.5rem;
-            color: #28a745;
-            margin-bottom: 20px;
+        .card-body {
+            text-align: left;
         }
 
         .btn-primary {
-            background-color: #007bff;
-            border: none;
-            border-radius: 4px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            transition: background-color 0.3s;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            /* Tamaño del botón */
+            height: 60px;
+            /* Tamaño del botón */
+            padding: 0;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
 
         .btn-primary:hover {
             background-color: #0056b3;
+            /* Color de fondo en hover */
+            transform: scale(1.1);
+            /* Escalar el botón en hover */
         }
 
-        .btn-primary:focus,
-        .btn-primary.focus {
-            box-shadow: none;
+        .btn-primary .bi-cart {
+            margin: 0;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            border-radius: 0.75rem;
+            /* Redondear bordes de la tarjeta */
+            overflow: hidden;
+        }
+
+        .row {
+            margin: 0;
+        }
+
+        .col-md-6 {
+            display: flex;
+            align-items: center;
+        }
+
+        .form-control {
+            text-align: center;
         }
     </style>
-</head>
+    @vite(['resources/css/index_publi.css'])
+@endpush
 
-<body>
-    <div class="product-details">
-        <h1>{{ $product->name }}</h1>
-        <img src="{{ $product->image_url }}" alt="{{ $product->name }}">
-        <p>{{ $product->description }}</p>
-        <p class="price">Precio: ${{ $product->price }}</p>
-        <a href="{{ route('products.index') }}" class="btn btn-primary">Volver al catálogo</a>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-
-</html>
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('add-to-cart-form')?.addEventListener('submit', function(event) {
+            @guest
+            event.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Por favor, inicie sesión para agregar productos al carrito.',
+                footer: '<a href="{{ route('login') }}">Iniciar sesión</a>'
+            });
+        @endguest
+        });
+    </script>
+@endpush
