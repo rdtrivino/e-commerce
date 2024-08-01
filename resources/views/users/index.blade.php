@@ -26,7 +26,9 @@
                         <tr>
                             <td>
                                 @if ($user->avatar)
-                                    <img src="{{ Auth::user()->avatar }}" alt="User Avatar" class="user-avatar">
+                                    <img src="{{ asset('storage/' . str_replace('storage/', '', $user->avatar)) }}"
+                                        alt="User Avatar" class="img-fluid rounded-circle"
+                                        style="width: 50px; height: 50px;">
                                 @else
                                     <img src="{{ asset('storage/avatars/default-avatar.png') }}" alt="Default Avatar"
                                         class="img-fluid rounded-circle" style="width: 50px; height: 50px;">

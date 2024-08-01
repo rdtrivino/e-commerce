@@ -51,16 +51,10 @@
                                 </label>
                             </div>
 
-                            <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex justify-content-center mb-3">
                                 <button type="submit" class="btn btn-primary">
                                     {{ __('Iniciar') }}
                                 </button>
-
-                                @if (Route::has('password.request'))
-                                    <a class="btn btn-link" href="{{ route('password.request') }}">
-                                        {{ __('¿Olvidaste tu contraseña?') }}
-                                    </a>
-                                @endif
                             </div>
                         </form>
                     </div>

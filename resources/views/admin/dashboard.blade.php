@@ -5,8 +5,6 @@
         <h1>Admin Dashboard</h1>
         <nav class="admin-nav">
             <a href="{{ route('products.index') }}">Productos</a>
-            <a href="{{ route('categories.index') }}">Categorías</a>
-            <a href="{{ route('orders.index') }}">Órdenes</a>
             <a href="{{ route('users.index') }}">Usuarios</a>
         </nav>
         <div>
@@ -23,10 +21,11 @@
     <div class="container">
         <div class="card">
             <h2 class="welcome-title">
-                <img src="{{ Auth::user()->avatar }}" alt="User Avatar" class="user-avatar">
+                <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://via.placeholder.com/100' }}"
+                    alt="User Avatar" class="user-avatar">
                 Welcome, {{ Auth::user()->name }}
             </h2>
-            <p>Use the navigation menu to manage products, categories, orders, and users.</p>
+            <p>Use the navigation menu to manage products, and users.</p>
         </div>
     </div>
 

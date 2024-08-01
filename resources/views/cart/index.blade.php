@@ -20,8 +20,10 @@
                     <tbody>
                         @foreach ($cartItems as $item)
                             <tr>
-                                <td><img src="{{ $item->attributes->image }}" alt="{{ $item->name }}" class="img-thumbnail"
-                                        width="80"></td>
+                                <td>
+                                    <img src="{{ $item->attributes->image ?? 'https://via.placeholder.com/100x100' }}"
+                                        alt="{{ $item->name }}" style="width: 100px; height: auto;">
+                                </td>
                                 <td>{{ $item->name }}</td>
                                 <td>{{ $item->quantity }}</td>
                                 <td>${{ number_format($item->price, 2) }}</td>
@@ -32,7 +34,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm">
-                                            <i class="bi bi-trash" onclick="showLoginAlert();"></i> Eliminar
+                                            <i class="bi bi-trash"></i> Eliminar
                                         </button>
                                     </form>
                                 </td>

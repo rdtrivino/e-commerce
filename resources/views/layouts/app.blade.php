@@ -8,7 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -34,18 +33,13 @@
                     <ul class="navbar-nav me-auto">
                         @auth
                             @if (Auth::user()->hasRole('admin'))
-                                <!-- Menú para administradores -->
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('products.index') }}">Productos</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('categories.index') }}">Categorías</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('users.index') }}">Usuarios</a>
                                 </li>
                             @else
-                                <!-- Menú desplegable para usuarios normales -->
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown"
                                         role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -80,9 +74,7 @@
                                 </li>
                             @endif
                         @else
-                            <!-- Menú de usuario autenticado -->
                             @if (!Auth::user()->hasRole('admin'))
-                                <!-- Enlace al carrito (solo para usuarios normales) -->
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('cart.index') }}">
                                         <i class="bi bi-cart"></i> Carrito
@@ -94,8 +86,8 @@
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    <img src="{{ Auth::user()->avatar }}" alt="Avatar" class="rounded-circle"
-                                        width="30" height="30">
+                                    <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://via.placeholder.com/30' }}"
+                                        alt="Avatar" class="rounded-circle" width="30" height="30">
                                     {{ Auth::user()->name }}
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">

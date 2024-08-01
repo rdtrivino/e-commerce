@@ -13,23 +13,27 @@ class CartController extends Controller
     {
         $product = Product::find($id);
 
-        Cart::add(array(
+        if (!$product) {
+            return redirect()->route('cart.index')->with('error', 'Producto no encontrado');
+        }
+
+        Cart::add([
             'id' => $product->id,
             'name' => $product->name,
             'price' => $product->price,
             'quantity' => $request->input('qty', 1),
-            'attributes' => array('image' => $product->image),
-        ));
+            'attributes' => ['image' => $product->image_url], // Asegúrate de usar 'image_url' si es el nombre de tu campo
+        ]);
 
         return redirect()->route('cart.index')->with('success', 'Producto agregado al carrito');
     }
 
     public function index(Request $request)
     {
-        $categories = Category::all(); 
+        $categories = Category::all();
         $cartItems = Cart::getContent();
         $total = Cart::getTotal();
-        $cartCount = Cart::getTotalQuantity(); 
+        $cartCount = Cart::getTotalQuantity();
 
         return view('cart.index', compact('cartItems', 'total', 'categories', 'cartCount'));
     }

@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class UserController extends Controller
 {
@@ -22,7 +22,7 @@ class UserController extends Controller
         $roles = Role::all();
 
         // Obtener avatares predefinidos desde la base de datos
-        $avatars = Media::where('collection_name', 'avatars')->get();
+        $avatars = User::pluck('avatar')->filter()->unique();
 
         return view('users.create', compact('roles', 'avatars'));
     }
@@ -48,7 +48,10 @@ class UserController extends Controller
         ]);
 
         if ($request->hasFile('avatar')) {
-            $user->addMedia($request->file('avatar'))->toMediaCollection('avatars');
+            // Almacenar el archivo en el disco 'public' y obtener la URL completa
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $avatarPath;
+            $user->save();
         } elseif ($request->input('avatar')) {
             $avatarUrl = $request->input('avatar');
             $this->savePredefinedAvatar($user, $avatarUrl);
@@ -56,7 +59,7 @@ class UserController extends Controller
 
         $user->assignRole($request->role);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
+        return redirect()->route('users.index')->with('success', 'Usuario creado con éxito.');
     }
 
     public function show(User $user)
@@ -69,7 +72,7 @@ class UserController extends Controller
         $roles = Role::all();
 
         // Obtener avatares predefinidos desde la base de datos
-        $avatars = Media::where('collection_name', 'avatars')->get();
+        $avatars = User::pluck('avatar')->filter()->unique();
 
         return view('users.edit', compact('user', 'roles', 'avatars'));
     }
@@ -91,13 +94,18 @@ class UserController extends Controller
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password ? Hash::make($request->password) : $user->password,
+            'password' => $request->filled('password') ? Hash::make($request->password) : $user->password,
         ]);
 
         if ($request->hasFile('avatar')) {
             // Eliminar el avatar antiguo si existe
-            $user->clearMediaCollection('avatars');
-            $user->addMedia($request->file('avatar'))->toMediaCollection('avatars');
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            // Almacenar el nuevo archivo y obtener la URL completa
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $avatarPath;
+            $user->save();
         } elseif ($request->input('avatar')) {
             $avatarUrl = $request->input('avatar');
             $this->savePredefinedAvatar($user, $avatarUrl);
@@ -105,13 +113,16 @@ class UserController extends Controller
 
         $user->syncRoles($request->role);
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
+        return redirect()->route('users.index')->with('success', 'Usuario actualizado con éxito.');
     }
 
     public function destroy(User $user)
     {
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
         $user->delete();
-        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+        return redirect()->route('users.index')->with('success', 'Usuario eliminado con éxito.');
     }
 
     /**
@@ -123,14 +134,16 @@ class UserController extends Controller
      */
     protected function savePredefinedAvatar(User $user, $avatarUrl)
     {
-        // Descargar la imagen desde la URL y agregarla a la colección de medios
+        // Descargar la imagen desde la URL y guardarla en el almacenamiento
         $imageContent = file_get_contents($avatarUrl);
-        $tempImagePath = storage_path('app/public/' . basename($avatarUrl));
-        file_put_contents($tempImagePath, $imageContent);
+        $filename = basename($avatarUrl);
+        $avatarStoragePath = 'avatars/' . $filename;
 
-        $user->addMedia($tempImagePath)->toMediaCollection('avatars');
+        // Guardar la imagen en el almacenamiento
+        Storage::disk('public')->put($avatarStoragePath, $imageContent);
 
-        // Elimina el archivo temporal después de subirlo
-        unlink($tempImagePath);
+        // Actualizar la URL del avatar en el usuario
+        $user->avatar = $avatarStoragePath;
+        $user->save();
     }
 }

@@ -24,20 +24,29 @@
                                 <div class="form-group">
                                     <label for="name">Nombre</label>
                                     <input type="text" name="name" id="name" class="form-control"
-                                        value="{{ $user->name }}" required>
+                                        value="{{ old('name', $user->name) }}" required>
+                                    @error('name')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <!-- Email -->
                                 <div class="form-group">
                                     <label for="email">Email</label>
                                     <input type="email" name="email" id="email" class="form-control"
-                                        value="{{ $user->email }}" required>
+                                        value="{{ old('email', $user->email) }}" required>
+                                    @error('email')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <!-- Contraseña -->
                                 <div class="form-group">
                                     <label for="password">Contraseña (deja en blanco para mantener la actual)</label>
                                     <input type="password" name="password" id="password" class="form-control">
+                                    @error('password')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <div class="form-group">
                                     <label for="password_confirmation">Confirmar Contraseña</label>
@@ -51,33 +60,29 @@
                                     <select name="role" id="role" class="form-control" required>
                                         @foreach ($roles as $role)
                                             <option value="{{ $role->name }}"
-                                                {{ $user->hasRole($role->name) ? 'selected' : '' }}>
+                                                {{ old('role', $user->getRoleNames()->first()) === $role->name ? 'selected' : '' }}>
                                                 {{ $role->name }}
                                             </option>
                                         @endforeach
                                     </select>
+                                    @error('role')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <!-- Avatar -->
                                 <div class="form-group">
                                     <label for="avatar">Selecciona un Avatar</label>
-                                    <select name="avatar" id="avatar" class="form-control">
-                                        <option value="">-- Selecciona un avatar --</option>
-                                        @foreach ($avatars as $avatar)
-                                            <option value="{{ $avatar->getUrl() }}"
-                                                {{ $user->hasMedia('avatars') && $user->getFirstMediaUrl('avatars') === $avatar->getUrl() ? 'selected' : '' }}
-                                                data-image="{{ $avatar->getUrl() }}">
-                                                <img src="{{ $avatar->getUrl() }}" alt="{{ $avatar->name }}"
-                                                    width="50" style="margin-right: 10px;">
-                                                {{ $avatar->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <img id="selected-avatar" src="{{ $user->getFirstMediaUrl('avatars') }}"
-                                        alt="User Avatar" class="img-thumbnail mt-2" width="100"
-                                        style="display: {{ $user->hasMedia('avatars') ? 'block' : 'none' }};">
-                                    <input type="file" name="custom_avatar" id="custom_avatar"
-                                        class="form-control-file mt-2">
+                                    <input type="file" name="avatar" id="avatar" class="form-control-file">
+                                    @if ($user->avatar)
+                                        <div class="mt-2">
+                                            <img src="{{ asset('storage/' . str_replace('storage/', '', $user->avatar)) }}"
+                                                alt="User Avatar" class="img-thumbnail" width="100">
+                                        </div>
+                                    @endif
+                                    @error('avatar')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <div class="form-group text-center">
@@ -90,21 +95,4 @@
             </div>
         </div>
     </div>
-
-    @push('scripts')
-        <script>
-            document.getElementById('avatar').addEventListener('change', function() {
-                const selectedAvatar = this.options[this.selectedIndex];
-                const imageUrl = selectedAvatar.getAttribute('data-image');
-                const imgElement = document.getElementById('selected-avatar');
-
-                if (imageUrl) {
-                    imgElement.src = imageUrl;
-                    imgElement.style.display = 'block';
-                } else {
-                    imgElement.style.display = 'none';
-                }
-            });
-        </script>
-    @endpush
 @endsection

@@ -16,32 +16,59 @@
                             <h1>Crear Nuevo Usuario</h1>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('users.store') }}" method="POST">
+                            <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="form-group mb-3">
                                     <label for="name">Nombre</label>
-                                    <input type="text" name="name" id="name" class="form-control" required>
+                                    <input type="text" name="name" id="name" class="form-control"
+                                        value="{{ old('name') }}" required>
+                                    @error('name')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="email">Email</label>
-                                    <input type="email" name="email" id="email" class="form-control" required>
+                                    <input type="email" name="email" id="email" class="form-control"
+                                        value="{{ old('email') }}" required>
+                                    @error('email')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="password">Contraseña</label>
                                     <input type="password" name="password" id="password" class="form-control" required>
+                                    @error('password')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="password_confirmation">Confirmar Contraseña</label>
                                     <input type="password" name="password_confirmation" id="password_confirmation"
                                         class="form-control" required>
+                                    @error('password_confirmation')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label for="role">Role</label>
+                                    <label for="role">Rol</label>
                                     <select name="role" id="role" class="form-control" required>
                                         @foreach ($roles as $role)
-                                            <option value="{{ $role->name }}">{{ $role->name }}</option>
+                                            <option value="{{ $role->name }}"
+                                                {{ old('role') == $role->name ? 'selected' : '' }}>
+                                                {{ $role->name }}
+                                            </option>
                                         @endforeach
                                     </select>
+                                    @error('role')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="avatar">Foto de Perfil</label>
+                                    <input type="file" name="avatar" id="avatar" class="form-control">
+                                    @error('avatar')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="text-center">
                                     <button type="submit" class="btn btn-primary">Crear</button>
@@ -52,4 +79,5 @@
                 </div>
             </div>
         </div>
-    @endsection
+    </div>
+@endsection

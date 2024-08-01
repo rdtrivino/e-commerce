@@ -36,8 +36,10 @@
                     @foreach ($products as $product)
                         <div class="col-md-4 mb-3">
                             <div class="card shadow-sm border-light rounded">
-                                <img src="{{ $product->image_url }}" class="card-img-top" alt="{{ $product->name }}"
-                                    style="max-height: 200px; object-fit: cover;">
+                                <div class="card-img-wrapper" style="position: relative; overflow: hidden; height: 200px;">
+                                    <img src="{{ $product->image_url }}" class="card-img-top" alt="{{ $product->name }}"
+                                        style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                                </div>
                                 <div class="card-body">
                                     <h5 class="card-title">{{ $product->name }}</h5>
                                     <p class="card-text">{{ Str::limit($product->description, 80) }}</p>
